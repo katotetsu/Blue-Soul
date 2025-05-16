@@ -1,3 +1,70 @@
+# Blue Soul Project
+
+## セットアップ手順
+
+1. 依存パッケージのインストール
+
+```bash
+npm install
+```
+
+2. 開発サーバーの起動
+
+```bash
+npm run dev
+```
+
+---
+
+## ディレクトリ構成
+
+- `src/app/chant_current/page.tsx` … 現在の応援歌ページ
+- `src/app/chant_search/page.tsx` … 応援歌検索ページ（雛形あり）
+- `src/components/common/Header.tsx` … 共通ヘッダーコンポーネント
+- `src/components/common/Footer.tsx` … 共通フッターコンポーネント
+
+---
+
+## 共通コンポーネントの使い方
+
+各ページで以下のようにインポートして使います。
+
+```tsx
+import Header from "@/components/common/Header";
+import Footer from "@/components/common/Footer";
+
+export default function SomePage() {
+  return (
+    <div>
+      <Header />
+      {/* ページ固有の内容 */}
+      <Footer />
+    </div>
+  );
+}
+```
+
+---
+
+## ページ雛形
+
+- `chant_search/page.tsx` にはHeader・Footerが組み込まれており、すぐに開発を始められます。
+- 必要に応じて他のページも同様の構成で作成してください。
+
+---
+
+## 注意事項
+
+- フッターのナビゲーションは、現在のページに応じてアイコンの色が自動で切り替わります。
+- 共通UIの修正は`components/common/`配下で行ってください。
+- 新しいページを追加する場合は`src/app/`配下にディレクトリを作成し、`page.tsx`を配置してください。
+
+---
+
+## その他
+
+- 質問や不明点があれば、READMEに追記するか、開発メンバーにご相談ください。
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
