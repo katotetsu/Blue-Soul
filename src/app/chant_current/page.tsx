@@ -4,11 +4,11 @@
 'use client'
 
 import { useEffect, useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
+//import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { FaMusic } from "react-icons/fa"
 import { MdGroups } from "react-icons/md"
-import { IoSearch } from "react-icons/io5"
+//import { IoSearch } from "react-icons/io5"
 import Header from "@/components/common/Header"
 import Footer from "@/components/common/Footer"
 
@@ -92,7 +92,7 @@ export default function ChantCurrentPage() {
         {/* チャント候補リスト（2列グリッド・縦スクロール） */}
         <section className="px-4 mt-2">
           <div className="grid grid-cols-2 gap-2 max-h-72 overflow-y-auto pb-1">
-            {mockCandidates.map((chant, i) => (
+            {mockCandidates.map((chant) => (
               <div key={chant.chantId} className="bg-white rounded-lg shadow p-2 flex flex-col items-center">
                 {/* チャント名 */}
                 <div className="font-bold text-blue-700 text-xs mb-0.5">{chant.name}</div>
