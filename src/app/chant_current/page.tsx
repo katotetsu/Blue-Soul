@@ -124,7 +124,7 @@ export default function ChantCurrentPage() {
               みんなが歌っているチャント
             </div>
             {latestCurrentChant?.updatedAt && (
-              <span className="text-blue-700 text-xs font-semibold">
+              <span className="text-blue-700 text-xs text-right">
                 集計：{(() => {
                   const date = latestCurrentChant.updatedAt.toDate ? latestCurrentChant.updatedAt.toDate() : latestCurrentChant.updatedAt;
                   return date instanceof Date ? 
