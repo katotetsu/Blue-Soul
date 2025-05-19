@@ -152,16 +152,17 @@ export default function ChantCurrentPage() {
 
       {/* 今聞こえているチャント */}
       <section className="fixed top-[300px] w-full max-w-md mx-auto px-4 z-10">
-        <div className="bg-blue-700 text-white rounded-xl py-3 px-2 text-center font-bold text-base shadow">
-          今聞こえているチャントをタップしよう！<br />
+        <div className="bg-blue-700 text-white rounded-xl py-2 px-3 text-center font-bold text-sm shadow flex justify-center items-center gap-2">
+          今聞こえているチャントをタップ！
           <span className="text-xs font-normal">
-            投稿締め切りまで残り {cooldown > 0 ? `${cooldown}秒` : `${VOTE_COOLDOWN}秒`}！
+            （残り {cooldown > 0 ? `${cooldown}秒` : `${VOTE_COOLDOWN}秒`}）
           </span>
         </div>
       </section>
 
+
       {/* スクロールエリアだけを限定 */}
-      <div className="absolute top-[380px] bottom-[60px] w-full max-w-md mx-auto px-4 overflow-y-auto">
+      <div className="absolute top-[350px] bottom-[60px] w-full max-w-md mx-auto px-4 overflow-y-auto">
         <div className="grid grid-cols-3 gap-2">
           {candidates.map((chant) => (
             <div key={chant.chantId} className="bg-white rounded-lg shadow p-2 flex flex-col items-start">
