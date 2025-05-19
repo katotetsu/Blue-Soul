@@ -7,26 +7,70 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FaMusic } from "react-icons/fa";
-import { MdGroups } from "react-icons/md";
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
 import { fetchTeamChants } from "@/features/chants/fetchTeamChants";
 import { Chant } from "@/features/chants/types";
+import { sendVote } from "@/features/votes/sendVote";
+import { generateFingerprint } from "@/features/votes/generateFingerprint";
+import { collection, getDocs, query, orderBy, limit, Timestamp } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+
+// クールダウン秒数を定数で管理
+const VOTE_COOLDOWN = 50;
+
+type CurrentChant = {
+  chantId: string;
+  name: string;
+  lyrics: string;
+  tags: string[];
+  voteCount: number;
+  updatedAt: Timestamp;
+};
 
 export default function ChantCurrentPage() {
   const [cooldown, setCooldown] = useState(0);
   const [teamChants, setTeamChants] = useState<Chant[]>([]);
-  const [currentChant, setCurrentChant] = useState<Chant | null>(null);
+  const [isVoting, setIsVoting] = useState(false); // 投票処理中フラグ
+  const [userFingerprint, setUserFingerprint] = useState<string>(''); // ユーザーフィンガープリント
+  const [latestCurrentChant, setLatestCurrentChant] = useState<CurrentChant | null>(null);
+
+  // 最初のレンダリング時にユーザーフィンガープリントを生成
+  useEffect(() => {
+    const fingerprint = generateFingerprint();
+    setUserFingerprint(fingerprint);
+    console.log('User fingerprint generated:', fingerprint);
+  }, []);
 
   useEffect(() => {
     const load = async () => {
       const teamOnly = await fetchTeamChants();
       setTeamChants(teamOnly);
-      if (teamOnly.length > 0) {
-        setCurrentChant(teamOnly[0]);
-      }
     };
     load();
+  }, []);
+
+  // currentChantコレクションから最新のチャントを取得
+  useEffect(() => {
+    const fetchLatestCurrentChant = async () => {
+      const q = query(collection(db, "currentChant"), orderBy("updatedAt", "desc"), limit(1));
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        const data = snap.docs[0].data();
+        setLatestCurrentChant({
+          chantId: data.chantId,
+          name: data.name,
+          lyrics: data.lyrics,
+          tags: data.tags,
+          voteCount: data.voteCount,
+          updatedAt: data.updatedAt
+        });
+      }
+    };
+    fetchLatestCurrentChant();
+    // 30秒ごとに自動更新
+    const interval = setInterval(fetchLatestCurrentChant, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   //クールタイムのカウントダウン
@@ -39,11 +83,28 @@ export default function ChantCurrentPage() {
   }, [cooldown]);
 
   // 「これ！」ボタンでcurrentChantを切り替え
-  const handleVote = (chantId: string) => {
-    if (cooldown > 0) return;
-    const next = teamChants.find((chant) => chant.chantId === chantId);
-    if (next) setCurrentChant(next);
-    setCooldown(2);
+  const handleVote = async (chantId: string) => {
+    // クールダウン中または投票処理中、またはフィンガープリントが未生成の場合は何もしない
+    if (cooldown > 0 || isVoting || !userFingerprint) return;
+    
+    try {
+      setIsVoting(true); // 投票処理開始
+      
+      // Firebaseに投票データを送信（フィンガープリント付き）
+      const success = await sendVote(chantId, userFingerprint);
+      
+      if (success) {
+        setCooldown(VOTE_COOLDOWN); // 定数を使用
+      } else {
+        // エラー時の処理（オプション）
+        console.error("投票の送信に失敗しました");
+        // エラー表示などを追加可能
+      }
+    } catch (error) {
+      console.error("投票処理中にエラーが発生しました:", error);
+    } finally {
+      setIsVoting(false); // 投票処理完了
+    }
   };
 
   // currentChant以外を候補として表示
@@ -54,7 +115,7 @@ export default function ChantCurrentPage() {
       {/* Header */}
       <Header />
 
-      {/* チャント表示 */}
+      {/* みんなが歌っているチャント（currentChantコレクションの最新） */}
       <section className="fixed top-[100px] w-full max-w-md mx-auto px-4 z-10">
         <div className="bg-white rounded-2xl shadow p-4 relative">
           <div className="flex items-center justify-between mb-2">
@@ -62,22 +123,29 @@ export default function ChantCurrentPage() {
               <FaMusic />
               みんなが歌っているチャント
             </div>
-            {currentChant?.tags && currentChant.tags.length > 0 && (
-              <span className="flex items-center gap-1 bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full font-semibold">
-                <MdGroups />{currentChant.tags[0]}
+            {latestCurrentChant?.updatedAt && (
+              <span className="text-blue-700 text-xs font-semibold">
+                集計：{(() => {
+                  const date = latestCurrentChant.updatedAt.toDate ? latestCurrentChant.updatedAt.toDate() : latestCurrentChant.updatedAt;
+                  return date instanceof Date ? 
+                    `${date.getMonth() + 1}/${date.getDate()} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}` : 
+                    String(date);
+                })()}
               </span>
             )}
           </div>
           {/* チャントタイトル（左寄せ） */}
           <div className="text-base font-bold text-blue-700 mb-1 text-left">
-            {currentChant?.name}
+            {latestCurrentChant?.name || "-"}
           </div>
           {/* 歌詞（中央寄せ・改行維持） */}
           <div
-            className="text-lg font-bold whitespace-pre-line leading-relaxed text-gray-900 text-left break-words w-full"
+            className="text-lg font-bold whitespace-pre-line leading-relaxed text-gray-900 text-left break-words w-full relative"
             style={{ minHeight: 100, maxHeight: 100 }}
           >
-            {currentChant?.lyrics}
+            {latestCurrentChant?.lyrics || "-"}
+            {/* タイムスタンプを歌詞ゾーンの右下に絶対配置 */}
+            
           </div>
         </div>
       </section>
@@ -87,7 +155,7 @@ export default function ChantCurrentPage() {
         <div className="bg-blue-700 text-white rounded-xl py-3 px-2 text-center font-bold text-base shadow">
           今聞こえているチャントをタップしよう！<br />
           <span className="text-xs font-normal">
-            投稿締め切りまで残り {cooldown > 0 ? `${cooldown}秒` : '2秒'}！
+            投稿締め切りまで残り {cooldown > 0 ? `${cooldown}秒` : `${VOTE_COOLDOWN}秒`}！
           </span>
         </div>
       </section>
@@ -106,9 +174,9 @@ export default function ChantCurrentPage() {
               <Button
                 className="w-full h-6 bg-blue-700 hover:bg-blue-800 text-white rounded-full py-0 text-[10px] font-bold min-h-0"
                 onClick={() => handleVote(chant.chantId)}
-                disabled={cooldown > 0}
+                disabled={cooldown > 0 || isVoting}
               >
-                これ！
+                {isVoting ? "送信中..." : "これ！"}
               </Button>
             </div>
           ))}
