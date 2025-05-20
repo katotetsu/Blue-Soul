@@ -13,11 +13,8 @@ import { fetchTeamChants } from "@/features/chants/fetchTeamChants";
 import { Chant } from "@/features/chants/types";
 import { sendVote } from "@/features/votes/sendVote";
 import { generateFingerprint } from "@/features/votes/generateFingerprint";
-import { collection, getDocs, query, orderBy, limit, Timestamp } from "firebase/firestore";
+import { collection, query, orderBy, limit, Timestamp, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-
-// クールダウン秒数を定数で管理
-const VOTE_COOLDOWN = 50;
 
 type CurrentChant = {
   chantId: string;
@@ -31,17 +28,48 @@ type CurrentChant = {
 export default function ChantCurrentPage() {
   const [cooldown, setCooldown] = useState(0);
   const [teamChants, setTeamChants] = useState<Chant[]>([]);
-  const [isVoting, setIsVoting] = useState(false); // 投票処理中フラグ
-  const [userFingerprint, setUserFingerprint] = useState<string>(''); // ユーザーフィンガープリント
+  const [isVoting, setIsVoting] = useState(false);
+  const [userFingerprint, setUserFingerprint] = useState<string>('');
   const [latestCurrentChant, setLatestCurrentChant] = useState<CurrentChant | null>(null);
+  const [canVote, setCanVote] = useState(true);
+  const [hasVoted, setHasVoted] = useState(false);
 
-  // 最初のレンダリング時にユーザーフィンガープリントを生成
+  // 投票可能時間の管理
   useEffect(() => {
-    const fingerprint = generateFingerprint();
-    setUserFingerprint(fingerprint);
-    console.log('User fingerprint generated:', fingerprint);
+    const checkVotingTime = () => {
+      const now = new Date();
+      const seconds = now.getSeconds();
+      // 毎分5秒から60秒（0秒）までが投票可能時間
+      const isVotingTime = seconds >= 5;
+      setCanVote(isVotingTime);
+      
+      // 次の集計までの残り秒数を計算
+      if (!isVotingTime) {
+        // 投票可能時間外の場合、次の投票可能時間までの残り秒数
+        setCooldown(5 - seconds);
+        // 投票可能時間外になったら投票フラグをリセット
+        setHasVoted(false);
+      } else {
+        // 投票可能時間内の場合、次の分の0秒までの残り秒数
+        setCooldown(60 - seconds);
+      }
+    };
+
+    // 初回チェック
+    checkVotingTime();
+
+    // 1秒ごとにチェック
+    const timer = setInterval(checkVotingTime, 1000);
+    return () => clearInterval(timer);
   }, []);
 
+  // フィンガープリントの生成
+  useEffect(() => {
+    const fp = generateFingerprint();
+    setUserFingerprint(fp);
+  }, []);
+
+  // チームのチャントを取得
   useEffect(() => {
     const load = async () => {
       const teamOnly = await fetchTeamChants();
@@ -50,13 +78,14 @@ export default function ChantCurrentPage() {
     load();
   }, []);
 
-  // currentChantコレクションから最新のチャントを取得
+  // currentChantコレクションから最新のチャントをリアルタイムで取得
   useEffect(() => {
-    const fetchLatestCurrentChant = async () => {
-      const q = query(collection(db, "currentChant"), orderBy("updatedAt", "desc"), limit(1));
-      const snap = await getDocs(q);
-      if (!snap.empty) {
-        const data = snap.docs[0].data();
+    const q = query(collection(db, "currentChant"), orderBy("updatedAt", "desc"), limit(1));
+    
+    // リアルタイムリスナーを設定
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      if (!snapshot.empty) {
+        const data = snapshot.docs[0].data();
         setLatestCurrentChant({
           chantId: data.chantId,
           name: data.name,
@@ -66,44 +95,31 @@ export default function ChantCurrentPage() {
           updatedAt: data.updatedAt
         });
       }
-    };
-    fetchLatestCurrentChant();
-    // 30秒ごとに自動更新
-    const interval = setInterval(fetchLatestCurrentChant, 30000);
-    return () => clearInterval(interval);
-  }, []);
+    });
 
-  //クールタイムのカウントダウン
-  useEffect(() => {
-    if (cooldown <= 0) return;
-    const interval = setInterval(() => {
-      setCooldown((prev) => prev - 1);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [cooldown]);
+    // クリーンアップ関数
+    return () => unsubscribe();
+  }, []);
 
   // 「これ！」ボタンでcurrentChantを切り替え
   const handleVote = async (chantId: string) => {
-    // クールダウン中または投票処理中、またはフィンガープリントが未生成の場合は何もしない
-    if (cooldown > 0 || isVoting || !userFingerprint) return;
+    // 投票可能時間外、投票済み、投票処理中、またはフィンガープリントが未生成の場合は何もしない
+    if (!canVote || hasVoted || isVoting || !userFingerprint) return;
     
     try {
-      setIsVoting(true); // 投票処理開始
+      setIsVoting(true);
       
-      // Firebaseに投票データを送信（フィンガープリント付き）
       const success = await sendVote(chantId, userFingerprint);
       
       if (success) {
-        setCooldown(VOTE_COOLDOWN); // 定数を使用
+        setHasVoted(true); // 投票成功時にフラグを立てる
       } else {
-        // エラー時の処理（オプション）
         console.error("投票の送信に失敗しました");
-        // エラー表示などを追加可能
       }
     } catch (error) {
       console.error("投票処理中にエラーが発生しました:", error);
     } finally {
-      setIsVoting(false); // 投票処理完了
+      setIsVoting(false);
     }
   };
 
@@ -155,36 +171,43 @@ export default function ChantCurrentPage() {
         <div className="bg-blue-700 text-white rounded-xl py-2 px-3 text-center font-bold text-sm shadow flex justify-center items-center gap-2">
           今聞こえているチャントをタップ！
           <span className="text-xs font-normal">
-            （残り {cooldown > 0 ? `${cooldown}秒` : `${VOTE_COOLDOWN}秒`}）
+            {!canVote ? 
+              `（クールタイム）` :
+              hasVoted ?
+                `（残り${cooldown}秒）` :
+                `（残り${cooldown}秒）`
+            }
           </span>
         </div>
       </section>
-
 
       {/* スクロールエリアだけを限定 */}
       <div className="absolute top-[350px] bottom-[60px] w-full max-w-md mx-auto px-4 overflow-y-auto">
         <div className="grid grid-cols-3 gap-2">
           {candidates.map((chant) => (
             <div key={chant.chantId} className="bg-white rounded-lg shadow p-2 flex flex-col items-start">
-              {/* チャント名のみ表示（左寄せ） */}
               <div className="font-bold text-blue-700 text-[10px] mb-0.5 text-left">{chant.name}</div>
-              {/* 歌詞の1行目を薄い色で表示 */}
               <div className="text-[10px] text-gray-400 mb-1 text-left w-full truncate">
                 {chant.lyrics.split("\n")[0]}
               </div>
               <Button
                 className="w-full h-6 bg-blue-700 hover:bg-blue-800 text-white rounded-full py-0 text-[10px] font-bold min-h-0"
                 onClick={() => handleVote(chant.chantId)}
-                disabled={cooldown > 0 || isVoting}
+                disabled={!canVote || hasVoted || isVoting}
               >
-                {isVoting ? "送信中..." : "これ！"}
+                {isVoting ? "送信中..." : hasVoted ? "投票済み" : "これ！"}
               </Button>
             </div>
           ))}
         </div>
-        {cooldown > 0 && (
+        {!canVote && (
           <p className="text-center text-xs text-gray-500 mt-2 shrink-0">
-            あと {cooldown} 秒で再投票可能
+            あと {cooldown} 秒で投票開始
+          </p>
+        )}
+        {canVote && (
+          <p className="text-center text-xs text-gray-500 mt-2 shrink-0">
+            あと {cooldown} 秒で次の集計
           </p>
         )}
       </div>
