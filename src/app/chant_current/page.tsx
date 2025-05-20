@@ -140,7 +140,7 @@ export default function ChantCurrentPage() {
       <VoteBanner canVote={canVote} hasVoted={hasVoted} cooldown={cooldown} />
 
       {/* 投票候補カード */}
-      <div className="absolute top-[340px] bottom-[60px] w-full max-w-md mx-auto px-4 overflow-y-auto">
+      <div className="absolute top-[330px] bottom-[60px] w-full max-w-md mx-auto px-4 overflow-y-auto">
         <div className="grid grid-cols-3 gap-2">
           {candidates.map((chant) => (
             <ChantCard

@@ -2,7 +2,7 @@
 
 export default function Header() {
   return (
-    <header className="fixed top-0 left-0 w-full z-10 flex pt-4 pb-4 px-6 bg-gradient-to-l from-[#0D277E] to-[#1847E4] rounded-b-3xl shadow text-white">
+    <header className="fixed top-0 left-0 w-full z-10 flex pt-3 pb-3 px-6 bg-gradient-to-l from-[#0D277E] to-[#1847E4] rounded-b-3xl shadow text-white">
       <div className="flex items-center">
         {/* 左上の丸いロゴ */}
         <div className="bg-white text-blue-700 font-bold rounded-full w-10 h-10 flex items-center justify-center text-lg mr-3 border-2 border-blue-300">KT</div>

@@ -7,7 +7,7 @@ export default function Footer() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 w-full bg-gradient-to-r from-[#0D277E] to-[#1847E4] flex justify-around items-center py-4 z-10">
+    <nav className="fixed bottom-0 left-0 w-full bg-gradient-to-r from-[#0D277E] to-[#1847E4] flex justify-around items-center py-3 z-10">
       <button
         className={`flex flex-col items-center text-white focus:outline-none transition ${pathname === "/chant_current" ? "" : "opacity-60"}`}
         onClick={() => router.push('/chant_current')}
