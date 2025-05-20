@@ -17,7 +17,7 @@ type Props = {
 export default function CurrentChantDisplay({ chant }: Props) {
   return (
     // 🔷 セクション全体（カードの外枠）
-    <section className="fixed top-[90px] w-full max-w-md mx-auto px-4 z-10">
+    <section className="fixed top-[80px] w-full max-w-md mx-auto px-4 z-10">
       <div className="rounded-2xl shadow overflow-hidden">
         
         {/* 🟦 ヘッダー部分（タイトル＋タイムスタンプ） */}
@@ -59,7 +59,7 @@ export default function CurrentChantDisplay({ chant }: Props) {
           
           {/* 📝 歌詞 */}
           <div
-            className="text-lg font-bold whitespace-pre-line leading-relaxed text-[#0D277E] text-left break-words w-full relative"
+            className="text-base font-bold whitespace-pre-line leading-normal text-black text-left break-words w-full relative"
             style={{ minHeight: 100, maxHeight: 100 }}
           >
             {chant?.lyrics || "-"}
