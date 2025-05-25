@@ -12,8 +12,8 @@ import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
 import { Play, Pause } from "lucide-react";
 import { Chant } from "@/features/chants/types";
-import { fetchTeamChants } from "@/features/chants/fetchTeamChants";
-
+import { collection, getDocs, QueryDocumentSnapshot, DocumentData } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 export default function ChantSearchPage() {
   const [chants, setChants] = useState<Chant[]>([]);
@@ -27,7 +27,19 @@ export default function ChantSearchPage() {
 
   useEffect(() => {
     const loadChants = async () => {
-      const allChants = await fetchTeamChants();
+      const snapshot = await getDocs(collection(db, "chants"));
+      const allChants: Chant[] = snapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
+        const d = doc.data();
+        return {
+          chantId: doc.id,
+          name: d.name ?? "",
+          lyrics: d.lyrics ?? "",
+          tags: Array.isArray(d.tags) ? d.tags : [],
+          playTime: d.playTime,
+          year: d.year,
+          youtubeUrl: d.youtubeUrl,
+        };
+      });
       setChants(allChants);
       if (allChants.length > 0) {
         setCurrentId(allChants[0].chantId);
@@ -49,11 +61,9 @@ export default function ChantSearchPage() {
     return matchText && matchType;
   });
 
-  
   const truncateText = (text: string, maxLength: number) => {
-  return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
-};
-
+    return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
+  };
 
   const extractYoutubeId = (url: string) => {
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#\&\?]*).*/;
@@ -130,65 +140,60 @@ export default function ChantSearchPage() {
     setCurrentTime(value);
   };
 
-  const formatTime = (sec: number) => `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, "0")}`;
+  const formatTime = (sec: number) =>
+    `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, "0")}`;
 
   return (
     <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden pt-24 pb-20 px-3">
       <Header />
 
       <section className="flex-shrink-0 max-w-xl w-full mx-auto">
-  { !currentChant ? null : (
-    <div className="bg-card text-foreground rounded-xl shadow border border-border">
-      
-      {/* 🎵 ラベル部分 */}
-      <div className="flex items-center justify-between bg-blue-800 text-white px-3 py-2 rounded-t-xl">
-        <div className="flex items-center gap-1 text-sm font-semibold">
-          <img src="/chant_kashi.png" alt="チャントの歌詞" className="w-7 h-7" />
+        {!currentChant ? null : (
+          <div className="bg-card text-foreground rounded-xl shadow border border-border">
+            <div className="flex items-center justify-between bg-blue-800 text-white px-3 py-2 rounded-t-xl">
+              <div className="flex items-center gap-1 text-sm font-semibold">
+                <img src="/chant_kashi.png" alt="チャントの歌詞" className="w-7 h-7" />
+                <span>チャントの歌詞</span>
+              </div>
+              <span className="text-blue-800 bg-white border border-blue-800 rounded-full px-2 py-0.5 text-xs font-medium">
+                {currentChant.tags.join(", ")}
+              </span>
+            </div>
 
-          <span>チャントの歌詞</span>
-        </div>
-        <span className="text-blue-800 bg-white border border-blue-800 rounded-full px-2 py-0.5 text-xs font-medium">
-          {currentChant.tags.join(", ")}
-        </span>
-      </div>
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="font-bold text-lg !text-blue-800">{currentChant.name}</div>
+                {currentChant.youtubeUrl && (
+                  <a href={currentChant.youtubeUrl} target="_blank" rel="noopener noreferrer">
+                    <img src="/youtube.png" alt="YouTube" className="w-16 h-7" />
+                  </a>
+                )}
+              </div>
 
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-2">
-          <div className="font-bold text-lg !text-blue-800">{currentChant.name}</div>
-          {currentChant.youtubeUrl && (
-            <a href={currentChant.youtubeUrl} target="_blank" rel="noopener noreferrer">
-              <img src="/youtube.png" alt="YouTube" className="w-16 h-8" />
-            </a>
-          )}
-        </div>
+              <div className="text-lg whitespace-pre-line text-black mb-3 leading-tight font-bold">
+                {currentChant.lyrics}
+              </div>
 
-        <div className="text-lg whitespace-pre-line text-black mb-3 leading-tight font-bold">
-          {currentChant.lyrics}
-        </div>
-
-        <div className="flex items-center gap-2 text-sm text-primary">
-          <span>{formatTime(currentTime)}</span>
-          <input
-            type="range"
-            min={0}
-            max={duration}
-            step={0.1}
-            value={currentTime}
-            onChange={(e) => onSliderChange(parseFloat(e.target.value))}
-            className="flex-1 accent-blue-500"
-          />
-          <span>{formatTime(duration)}</span>
-          <button onClick={togglePlay}>
-            {isPlaying ? <Pause size={20} /> : <Play size={20} />}
-          </button>
-        </div>
-      </div>
-    </div>
-  )}
-</section>
-
-
-
+              <div className="flex items-center gap-2 text-sm text-primary">
+                <span>{formatTime(currentTime)}</span>
+                <input
+                  type="range"
+                  min={0}
+                  max={duration}
+                  step={0.1}
+                  value={currentTime}
+                  onChange={(e) => onSliderChange(parseFloat(e.target.value))}
+                  className="flex-1 accent-blue-500"
+                />
+                <span>{formatTime(duration)}</span>
+                <button onClick={togglePlay}>
+                  {isPlaying ? <Pause size={20} /> : <Play size={20} />}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </section>
 
       <section className="max-w-xl w-full mx-auto px-3 mt-4 mb-4">
         <div className="text-sm font-semibold flex items-center gap-1 text-blue-800">
@@ -206,13 +211,21 @@ export default function ChantSearchPage() {
           />
           <button
             onClick={() => setTypeFilter("チーム")}
-            className={`px-3 py-1 text-sm rounded border ${typeFilter === "チーム" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
+            className={`px-3 py-1 text-sm rounded border ${
+              typeFilter === "チーム"
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground"
+            }`}
           >
             チーム
           </button>
           <button
             onClick={() => setTypeFilter("個人")}
-            className={`px-3 py-1 text-sm rounded border ${typeFilter === "個人" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
+            className={`px-3 py-1 text-sm rounded border ${
+              typeFilter === "個人"
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground"
+            }`}
           >
             個人
           </button>
@@ -224,56 +237,56 @@ export default function ChantSearchPage() {
           {filtered.length > 0 ? (
             filtered.map((chant) => (
               <div
-  key={chant.chantId}
-  onClick={() => {
-    setCurrentId(chant.chantId);
-    if (chant.youtubeUrl) {
-      const id = extractYoutubeId(chant.youtubeUrl);
-      const url = `https://www.youtube.com/embed/${id}?autoplay=1`;
-      setCurrentTime(0);
-      setDuration(0);
-      setTimeout(() => {
-        if (playerRef.current?.loadVideoById) {
-          playerRef.current.loadVideoById(id);
-        }
-      }, 100);
-    }
-  }}
-  className={`rounded-lg px-4 py-3 text-sm bg-card text-foreground border flex items-center cursor-pointer ${
-    currentId === chant.chantId ? "border-primary ring-1 ring-primary" : "border-border"
-  }`}
->
-  {/* 左アイコン */}
-  <img src="/chant.png" alt="icon" className="w-8 h-8 mr-3" />
-
-  {/* 中央: タイトルと歌詞 */}
-  <div className="flex-1">
-    <div className="font-semibold text-blue-800">{chant.name}</div>
-    <div className="text-xs text-muted-foreground">{truncateText(chant.lyrics, 30)}</div>
-  </div>
-
-  {/* 右側: 時間と表示中 */}
-  <div className="text-xs flex flex-col items-end ml-2">
-    <span>
-      {chant.playTime
-        ? `${Math.floor(chant.playTime / 60)}:${String(chant.playTime % 60).padStart(2, "0")}`
-        : "0:00"}
-    </span>
-    {currentId === chant.chantId && (
-      <span className="text-primary text-[11px] font-bold mt-0.5">表示中</span>
-    )}
-  </div>
-</div>
-
+                key={chant.chantId}
+                onClick={() => {
+                  setCurrentId(chant.chantId);
+                  if (chant.youtubeUrl) {
+                    const id = extractYoutubeId(chant.youtubeUrl);
+                    setCurrentTime(0);
+                    setDuration(0);
+                    setTimeout(() => {
+                      if (playerRef.current?.loadVideoById) {
+                        playerRef.current.loadVideoById(id);
+                      }
+                    }, 100);
+                  }
+                }}
+                className={`rounded-lg px-4 py-3 text-sm bg-card text-foreground border flex items-center cursor-pointer ${
+                  currentId === chant.chantId
+                    ? "border-primary ring-1 ring-primary"
+                    : "border-border"
+                }`}
+              >
+                <img src="/chant.png" alt="icon" className="w-8 h-8 mr-3" />
+                <div className="flex-1">
+                  <div className="font-semibold text-blue-800">{chant.name}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {truncateText(chant.lyrics, 30)}
+                  </div>
+                </div>
+                <div className="text-xs flex flex-col items-end ml-2">
+                  <span>
+                    {chant.playTime
+                      ? `${Math.floor(chant.playTime / 60)}:${String(
+                          chant.playTime % 60
+                        ).padStart(2, "0")}`
+                      : "0:00"}
+                  </span>
+                  {currentId === chant.chantId && (
+                    <span className="text-primary text-[11px] font-bold mt-0.5">表示中</span>
+                  )}
+                </div>
+              </div>
             ))
           ) : (
-            <div className="text-center text-sm text-muted-foreground">一致するチャントが見つかりませんでした。</div>
+            <div className="text-center text-sm text-muted-foreground">
+              一致するチャントが見つかりませんでした。
+            </div>
           )}
         </section>
       </main>
 
       <Footer />
-
       <div id="yt-player" className="hidden" />
     </div>
   );

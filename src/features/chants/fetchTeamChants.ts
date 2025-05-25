@@ -2,7 +2,7 @@ import { collection, getDocs, QueryDocumentSnapshot, DocumentData } from "fireba
 import { db } from "@/lib/firebase";
 import { Chant } from "./types";
 
-//チームのチャントを取得する
+// すべてのチャントを取得する（チームも個人も）
 export const fetchTeamChants = async (): Promise<Chant[]> => {
   const snapshot = await getDocs(collection(db, "chants"));
   const data: Chant[] = snapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
@@ -17,10 +17,5 @@ export const fetchTeamChants = async (): Promise<Chant[]> => {
       youtubeUrl: d.youtubeUrl,
     };
   });
-  // 「チーム」タグのみ、かつ特定のチャント名を除外
-  return data.filter((chant) =>
-    chant.tags && chant.tags.includes("チーム") &&
-    chant.name !== "エンターティナー" &&
-    chant.name !== "勝利奪って帰ろう"
-  );
+  return data; // ← 必ず return が必要
 };
