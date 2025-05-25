@@ -17,6 +17,6 @@ export const fetchTeamChants = async (): Promise<Chant[]> => {
       youtubeUrl: d.youtubeUrl,
     };
   });
-  // 「チーム」タグのみ
-  return data.filter((chant) => chant.tags && chant.tags.includes("チーム"));
+
+  return data;
 };
