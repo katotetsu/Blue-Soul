@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "カターレ富山 | 応援歌(チャント)検索アプリ",
   description: "カターレ富山の応援歌(チャント)をリアルタイムで表示・投票できるアプリ。みんなで応援しよう",
+  icons: {
+    icon: "/kataller_icon.svg",
+  },
 };
 
 export default function RootLayout({
