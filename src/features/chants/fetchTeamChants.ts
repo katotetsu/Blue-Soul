@@ -17,6 +17,10 @@ export const fetchTeamChants = async (): Promise<Chant[]> => {
       youtubeUrl: d.youtubeUrl,
     };
   });
-
-  return data;
+  // 「チーム」タグのみ、かつ特定のチャント名を除外
+  return data.filter((chant) =>
+    chant.tags && chant.tags.includes("チーム") &&
+    chant.name !== "エンターティナー" &&
+    chant.name !== "勝利奪って帰ろう"
+  );
 };

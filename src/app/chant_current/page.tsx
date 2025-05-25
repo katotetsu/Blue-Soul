@@ -5,119 +5,155 @@
 'use client'
 
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { FaMusic } from "react-icons/fa";
-import { MdGroups } from "react-icons/md";
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
 import { fetchTeamChants } from "@/features/chants/fetchTeamChants";
 import { Chant } from "@/features/chants/types";
+import { sendVote } from "@/features/votes/sendVote";
+import { generateFingerprint } from "@/features/votes/generateFingerprint";
+import { collection, query, orderBy, limit, Timestamp, onSnapshot } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import CurrentChantDisplay from "@/components/chantCurrent/CurrentChantDisplay";
+import VoteBanner from "@/components/chantCurrent/VoteBanner";
+import ChantCard from "@/components/chantCurrent/ChantCard";
+import CountdownLabel from "@/components/chantCurrent/CountdownLabel";
+
+type CurrentChant = {
+  chantId: string;
+  name: string;
+  lyrics: string;
+  tags: string[];
+  voteCount: number;
+  updatedAt: Timestamp;
+};
 
 export default function ChantCurrentPage() {
   const [cooldown, setCooldown] = useState(0);
   const [teamChants, setTeamChants] = useState<Chant[]>([]);
-  const [currentChant, setCurrentChant] = useState<Chant | null>(null);
+  const [isVoting, setIsVoting] = useState(false);
+  const [userFingerprint, setUserFingerprint] = useState<string>('');
+  const [latestCurrentChant, setLatestCurrentChant] = useState<CurrentChant | null>(null);
+  const [canVote, setCanVote] = useState(true);
+  const [hasVoted, setHasVoted] = useState(false);
 
+  // 投票可能時間の管理
+  useEffect(() => {
+    const checkVotingTime = () => {
+      const now = new Date();
+      const seconds = now.getSeconds();
+      // 毎分5秒から60秒（0秒）までが投票可能時間
+      const isVotingTime = seconds >= 5;
+      setCanVote(isVotingTime);
+      
+      // 次の集計までの残り秒数を計算
+      if (!isVotingTime) {
+        // 投票可能時間外の場合、次の投票可能時間までの残り秒数
+        setCooldown(5 - seconds);
+        // 投票可能時間外になったら投票フラグをリセット
+        setHasVoted(false);
+      } else {
+        // 投票可能時間内の場合、次の分の0秒までの残り秒数
+        setCooldown(60 - seconds);
+      }
+    };
+
+    // 初回チェック
+    checkVotingTime();
+
+    // 1秒ごとにチェック
+    const timer = setInterval(checkVotingTime, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // フィンガープリントの生成
+  useEffect(() => {
+    const fp = generateFingerprint();
+    setUserFingerprint(fp);
+  }, []);
+
+  // チームのチャントを取得
   useEffect(() => {
     const load = async () => {
       const teamOnly = await fetchTeamChants();
       setTeamChants(teamOnly);
-      if (teamOnly.length > 0) {
-        setCurrentChant(teamOnly[0]);
-      }
     };
     load();
   }, []);
 
-  //クールタイムのカウントダウン
+  // currentChantコレクションから最新のチャントをリアルタイムで取得
   useEffect(() => {
-    if (cooldown <= 0) return;
-    const interval = setInterval(() => {
-      setCooldown((prev) => prev - 1);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [cooldown]);
+    const q = query(collection(db, "currentChant"), orderBy("updatedAt", "desc"), limit(1));
+    
+    // リアルタイムリスナーを設定
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      if (!snapshot.empty) {
+        const data = snapshot.docs[0].data();
+        setLatestCurrentChant({
+          chantId: data.chantId,
+          name: data.name,
+          lyrics: data.lyrics,
+          tags: data.tags,
+          voteCount: data.voteCount,
+          updatedAt: data.updatedAt
+        });
+      }
+    });
+
+    // クリーンアップ関数
+    return () => unsubscribe();
+  }, []);
 
   // 「これ！」ボタンでcurrentChantを切り替え
-  const handleVote = (chantId: string) => {
-    if (cooldown > 0) return;
-    const next = teamChants.find((chant) => chant.chantId === chantId);
-    if (next) setCurrentChant(next);
-    setCooldown(2);
+  const handleVote = async (chantId: string) => {
+    // 投票可能時間外、投票済み、投票処理中、またはフィンガープリントが未生成の場合は何もしない
+    if (!canVote || hasVoted || isVoting || !userFingerprint) return;
+    
+    try {
+      setIsVoting(true);
+      
+      const success = await sendVote(chantId, userFingerprint);
+      
+      if (success) {
+        setHasVoted(true); // 投票成功時にフラグを立てる
+      } else {
+        console.error("投票の送信に失敗しました");
+      }
+    } catch (error) {
+      console.error("投票処理中にエラーが発生しました:", error);
+    } finally {
+      setIsVoting(false);
+    }
   };
 
   // currentChant以外を候補として表示
   const candidates = teamChants;
 
   return (
-    <div className="relative h-screen bg-gradient-to-b from-blue-700 to-blue-300">
+    <div className="relative h-screen bg-[#F1F2F6]">
       {/* Header */}
       <Header />
 
-      {/* チャント表示 */}
-      <section className="fixed top-[100px] w-full max-w-md mx-auto px-4 z-10">
-        <div className="bg-white rounded-2xl shadow p-4 relative">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-1 text-blue-700 font-semibold">
-              <FaMusic />
-              みんなが歌っているチャント
-            </div>
-            {currentChant?.tags && currentChant.tags.length > 0 && (
-              <span className="flex items-center gap-1 bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full font-semibold">
-                <MdGroups />{currentChant.tags[0]}
-              </span>
-            )}
-          </div>
-          {/* チャントタイトル（左寄せ） */}
-          <div className="text-base font-bold text-blue-700 mb-1 text-left">
-            {currentChant?.name}
-          </div>
-          {/* 歌詞（中央寄せ・改行維持） */}
-          <div
-            className="text-lg font-bold whitespace-pre-line leading-relaxed text-gray-900 text-left break-words w-full"
-            style={{ minHeight: 100, maxHeight: 100 }}
-          >
-            {currentChant?.lyrics}
-          </div>
-        </div>
-      </section>
+      {/* 最新チャント表示 */}
+      <CurrentChantDisplay chant={latestCurrentChant} />
 
-      {/* 今聞こえているチャント */}
-      <section className="fixed top-[300px] w-full max-w-md mx-auto px-4 z-10">
-        <div className="bg-blue-700 text-white rounded-xl py-3 px-2 text-center font-bold text-base shadow">
-          今聞こえているチャントをタップしよう！<br />
-          <span className="text-xs font-normal">
-            投稿締め切りまで残り {cooldown > 0 ? `${cooldown}秒` : '2秒'}！
-          </span>
-        </div>
-      </section>
+      {/* 投票バナー */}
+      <VoteBanner canVote={canVote} hasVoted={hasVoted} cooldown={cooldown} />
 
-      {/* スクロールエリアだけを限定 */}
-      <div className="absolute top-[380px] bottom-[60px] w-full max-w-md mx-auto px-4 overflow-y-auto">
+      {/* 投票候補カード */}
+      <div className="absolute top-[330px] bottom-[60px] w-full max-w-md mx-auto px-4 overflow-y-auto">
         <div className="grid grid-cols-3 gap-2">
           {candidates.map((chant) => (
-            <div key={chant.chantId} className="bg-white rounded-lg shadow p-2 flex flex-col items-start">
-              {/* チャント名のみ表示（左寄せ） */}
-              <div className="font-bold text-blue-700 text-[10px] mb-0.5 text-left">{chant.name}</div>
-              {/* 歌詞の1行目を薄い色で表示 */}
-              <div className="text-[10px] text-gray-400 mb-1 text-left w-full truncate">
-                {chant.lyrics.split("\n")[0]}
-              </div>
-              <Button
-                className="w-full h-6 bg-blue-700 hover:bg-blue-800 text-white rounded-full py-0 text-[10px] font-bold min-h-0"
-                onClick={() => handleVote(chant.chantId)}
-                disabled={cooldown > 0}
-              >
-                これ！
-              </Button>
-            </div>
+            <ChantCard
+              key={chant.chantId}
+              chant={chant}
+              onVote={handleVote}
+              disabled={!canVote || hasVoted || isVoting}
+              isVoting={isVoting}
+              hasVoted={hasVoted}
+            />
           ))}
         </div>
-        {cooldown > 0 && (
-          <p className="text-center text-xs text-gray-500 mt-2 shrink-0">
-            あと {cooldown} 秒で再投票可能
-          </p>
-        )}
+        <CountdownLabel canVote={canVote} cooldown={cooldown} />
       </div>
 
       {/* Footer */}
