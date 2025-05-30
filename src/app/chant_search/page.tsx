@@ -64,12 +64,9 @@ export default function ChantSearchPage() {
   const [duration, setDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const playerRef = useRef<YTPlayer | null>(null);
-<<<<<<< HEAD
-=======
   const [shouldPlay, setShouldPlay] = useState(false);
 
   
->>>>>>> fix/search-ui2
 
   useEffect(() => {
     const loadChants = async () => {
@@ -133,27 +130,6 @@ export default function ChantSearchPage() {
         playerRef.current.destroy();
       }
       playerRef.current = new window.YT.Player("yt-player", {
-<<<<<<< HEAD
-        height: "0",
-        width: "0",
-        videoId: extractYoutubeId(currentChant.youtubeUrl!),
-        playerVars: {
-          loop: 1,
-          playlist: extractYoutubeId(currentChant.youtubeUrl!),
-        },
-        events: {
-          onReady: () => {},
-          onStateChange: (event: YTPlayerEvent) => {
-            const state = event.data;
-            if (state === window.YT.PlayerState.ENDED) {
-              playerRef.current?.seekTo(0);
-              playerRef.current?.playVideo();
-            }
-            setIsPlaying(state === window.YT.PlayerState.PLAYING);
-          },
-        },
-      });
-=======
   height: "0",
   width: "0",
   videoId: extractYoutubeId(currentChant.youtubeUrl!),
@@ -179,7 +155,6 @@ export default function ChantSearchPage() {
 },
 });
 
->>>>>>> fix/search-ui2
     };
 
     if (window.YT?.Player) {
@@ -287,15 +262,7 @@ export default function ChantSearchPage() {
 
 
     {/* 検索バーとフィルター */}
-<<<<<<< HEAD
-    <section className="w-full max-w-md sticky top-[300px] z-20 bg-[#F1F2F6] pb-2 px-4">
-  <div className="text-sm font-semibold flex items-center gap-1 text-blue-800 mb-1">
-    <Image src="/Narrow_down.png" alt="絞り込み" width={24} height={24} />
-    絞り込み
-  </div>
-=======
     <section className="fixed top-[300px] w-full max-w-md mx-auto z-30 bg-[#F1F2F6] pb-2 px-4">
->>>>>>> fix/search-ui2
 
   <div className="flex items-center gap-2 w-full">
     {/* 🔍 検索ボックス */}
