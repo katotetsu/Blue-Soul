@@ -2,12 +2,52 @@
 
 declare global {
   interface Window {
-    YT: any;
+    YT: {
+      Player: new (
+        elementId: string,
+        config: {
+          height: string | number;
+          width: string | number;
+          videoId: string;
+          playerVars?: Record<string, string | number | boolean>;
+          events?: {
+            onReady?: () => void;
+            onStateChange?: (event: YTPlayerEvent) => void;
+            onError?: () => void;
+          };
+        }
+      ) => YTPlayer;
+      PlayerState: {
+        UNSTARTED: number;
+        ENDED: number;
+        PLAYING: number;
+        PAUSED: number;
+        BUFFERING: number;
+        CUED: number;
+      };
+    };
     onYouTubeIframeAPIReady: () => void;
   }
 }
 
+interface YTPlayer {
+  destroy: () => void;
+  getCurrentTime: () => number;
+  getDuration: () => number;
+  getPlayerState: () => number;
+  pauseVideo: () => void;
+  playVideo: () => void;
+  seekTo: (seconds: number, allowSeekAhead?: boolean) => void;
+  loadVideoById: (videoId: string) => void;
+}
+
+interface YTPlayerEvent {
+  data: number;
+  target: YTPlayer;
+}
+
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
 import { Play, Pause } from "lucide-react";
@@ -23,7 +63,10 @@ export default function ChantSearchPage() {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const playerRef = useRef<any>(null);
+  const playerRef = useRef<YTPlayer | null>(null);
+  const [shouldPlay, setShouldPlay] = useState(false);
+
+  
 
   useEffect(() => {
     const loadChants = async () => {
@@ -87,25 +130,31 @@ export default function ChantSearchPage() {
         playerRef.current.destroy();
       }
       playerRef.current = new window.YT.Player("yt-player", {
-        height: "0",
-        width: "0",
-        videoId: extractYoutubeId(currentChant.youtubeUrl!),
-        playerVars: {
-          loop: 1,
-          playlist: extractYoutubeId(currentChant.youtubeUrl!),
-        },
-        events: {
-          onReady: () => {},
-          onStateChange: (event: any) => {
-            const state = event.data;
-            if (state === window.YT.PlayerState.ENDED) {
-              playerRef.current.seekTo(0);
-              playerRef.current.playVideo();
-            }
-            setIsPlaying(state === window.YT.PlayerState.PLAYING);
-          },
-        },
-      });
+  height: "0",
+  width: "0",
+  videoId: extractYoutubeId(currentChant.youtubeUrl!),
+  playerVars: {
+    loop: 1,
+    playlist: extractYoutubeId(currentChant.youtubeUrl!),
+  },
+  events: {
+  onReady: () => {
+    if (shouldPlay) {
+      playerRef.current?.playVideo();
+      setShouldPlay(false);
+    }
+  },
+  onStateChange: (event: YTPlayerEvent) => {
+    const state = event.data;
+    if (state === window.YT.PlayerState.ENDED) {
+      playerRef.current?.seekTo(0);
+      playerRef.current?.playVideo();
+    }
+    setIsPlaying(state === window.YT.PlayerState.PLAYING);
+  },
+},
+});
+
     };
 
     if (window.YT?.Player) {
@@ -144,28 +193,28 @@ export default function ChantSearchPage() {
     `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, "0")}`;
 
   return (
-  <div className="relative flex flex-col h-screen bg-[#F1F2F6] text-foreground overflow-hidden pt-4 px-3 items-start">
+  <div className="relative  w-screen flex flex-col h-screen bg-[#F1F2F6] text-foreground overflow-hidden  items-start">
     <Header />
 
     {/* チャント表示部分 */}
-   <section className="fixed top-[70px] w-full max-w-md z-0">
+   <section className="fixed top-[70px] w-full max-w-md mx-auto px-4 z-0">
   {!currentChant ? null : (
     <div className="rounded-2xl shadow overflow-hidden border border-border bg-white">
-      <div className="flex items-center justify-between bg-blue-800 text-white px-4 py-2">
+      <div className="flex items-center justify-between bg-[#0D277E] text-white px-4 py-2">
         <div className="flex items-center gap-1 text-sm font-semibold">
-          <img src="/chant_kashi.png" alt="チャントの歌詞" className="w-7 h-7" />
+          <Image src="/chant_kashi.png" alt="チャントの歌詞" width={28} height={28} />
           <span>チャントの歌詞</span>
         </div>
-        <span className="text-blue-800 bg-white border border-blue-800 rounded-full px-2 py-0.5 text-xs font-medium">
+        <span className="text-blue-800 bg-white border border-[#0D277E] rounded-full px-2 py-0.5 text-xs font-medium">
           {currentChant.tags.join(", ")}
         </span>
       </div>
 
       {/* 歌詞エリアと固定バー */}
-      <div className="relative px-4 pt-3 pb-[50px] h-[190px]">
-        <div className="text-lg text-black leading-tight font-bold h-[140px] overflow-hidden whitespace-pre-line">
+      <div className="relative px-2 pt-3 pb-[50px] h-[180px] box-border">
+        <div className="text-base text-black leading-tight font-bold h-[140px] overflow-y-auto whitespace-pre-line pr-1">
           <div className="flex items-center justify-between mb-1">
-            <div className="text-blue-800 font-black text-lg md:text-2xl">
+            <div className="text-blue-800 font-black text-lg md:text-2xl flex-1">
               {currentChant.name}
             </div>
             {currentChant.youtubeUrl && (
@@ -175,10 +224,12 @@ export default function ChantSearchPage() {
                 rel="noopener noreferrer"
                 className="ml-2"
               >
-                <img
+                <Image
                   src="/youtube.png"
                   alt="YouTube"
-                  className="w-16 h-8 object-contain"
+                  width={64}
+                  height={32}
+                  className="object-contain"
                 />
               </a>
             )}
@@ -195,12 +246,12 @@ export default function ChantSearchPage() {
             step={0.1}
             value={currentTime}
             onChange={(e) => onSliderChange(parseFloat(e.target.value))}
-            className="flex-1 accent-blue-500 "
+            className="flex-1 accent-[#0D277E] "
             style={{ maxWidth: "70%" }} 
           />
           <span className="w-8 text-right">{formatTime(duration)}</span>
           <button onClick={togglePlay}
-           className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center shadow-md">
+           className="w-10 h-10 rounded-full  bg-[#0D277E] flex items-center justify-center shadow-md">
             {isPlaying ? <Pause size={20} className="text-white"/> : <Play size={20} className="text-white"/>}
           </button>
         </div>
@@ -211,11 +262,7 @@ export default function ChantSearchPage() {
 
 
     {/* 検索バーとフィルター */}
-    <section className="w-full max-w-md sticky top-[300px] z-20 bg-[#F1F2F6] pb-2 px-4">
-  <div className="text-sm font-semibold flex items-center gap-1 text-blue-800 mb-1">
-    <img src="/Narrow_down.png" alt="絞り込み" className="w-6 h-6" />
-    絞り込み
-  </div>
+    <section className="fixed top-[300px] w-full max-w-md mx-auto z-30 bg-[#F1F2F6] pb-2 px-4">
 
   <div className="flex items-center gap-2 w-full">
     {/* 🔍 検索ボックス */}
@@ -230,7 +277,7 @@ export default function ChantSearchPage() {
         placeholder="キーワード検索 ..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="w-full pl-9 pr-3 py-2 text-sm rounded-md border border-blue-700 focus:outline-none bg-white"
+        className="w-full pl-9 pr-3 py-2 text-sm rounded-md border border-[#0D277E] focus:outline-none bg-white"
       />
     </div>
 
@@ -240,18 +287,18 @@ export default function ChantSearchPage() {
         onClick={() => setTypeFilter("チーム")}
         className={`px-3 py-2 transition-colors ${
           typeFilter === "チーム"
-            ? "bg-blue-700 text-white"
-            : "bg-white text-blue-700"
+            ? "bg-[#0D277E] text-white"
+            : "bg-white text-[#0D277E]"
         }`}
       >
         チーム
       </button>
       <button
         onClick={() => setTypeFilter("個人")}
-        className={`px-3 py-1 transition-colors ${
+        className={`px-3 py-1 transition-colors border-l ${
           typeFilter === "個人"
-            ? "bg-blue-700 text-white"
-            : "bg-white text-blue-700"
+            ? "bg-[#0D277E] text-white"
+            : "bg-white text-blue-[#0D277E]"
         }`}
       >
         個人
@@ -262,14 +309,16 @@ export default function ChantSearchPage() {
 
 
     {/* チャント一覧リスト */}
-    <main className="absolute top-[390px] bottom-[60px] overflow-y-auto w-full max-w-md space-y-4">
+    <main className="absolute top-[350px] bottom-[60px] overflow-y-auto w-full max-w-md mx-auto px-4 space-y-4">
       <section className="space-y-3 pb-4">
         {filtered.length > 0 ? (
           filtered.map((chant) => (
             <div
               key={chant.chantId}
-              onClick={() => {
+            onClick={() => {
                 setCurrentId(chant.chantId);
+                setShouldPlay(true);  // 再生フラグON
+
                 if (chant.youtubeUrl) {
                   const id = extractYoutubeId(chant.youtubeUrl);
                   setCurrentTime(0);
@@ -277,13 +326,17 @@ export default function ChantSearchPage() {
                   setTimeout(() => {
                     if (playerRef.current?.loadVideoById) {
                       playerRef.current.loadVideoById(id);
+                      // ❌ setIsPlaying(true) は削除
+                      // ✅ 実際に再生が始まったら onStateChange が反応するので不要
                     }
                   }, 100);
                 }
               }}
+
+
               className={`rounded-2xl shadow px-4 py-3 text-sm border flex items-center cursor-pointer ${currentId === chant.chantId ? "bg-blue-200 text-white border-blue-700 ring-1 ring-blue-700" : "bg-white text-black border-border"}`}
             >
-              <img src="/chant.png" alt="icon" className="w-8 h-8 mr-3" />
+              <Image src="/chant.png" alt="icon" width={32} height={32} className="mr-3" />
               <div className="flex-1">
                 <div className="font-semibold text-blue-800">{chant.name}</div>
                 <div className="text-xs text-muted-foreground">
