@@ -230,7 +230,7 @@ export default function ChantSearchPage() {
         placeholder="キーワード検索 ..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="w-full pl-9 pr-3 py-2 text-sm rounded-md border border-blue-300 focus:outline-none bg-white"
+        className="w-full pl-9 pr-3 py-2 text-sm rounded-md border border-blue-700 focus:outline-none bg-white"
       />
     </div>
 
