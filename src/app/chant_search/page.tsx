@@ -205,7 +205,7 @@ export default function ChantSearchPage() {
           <Image src="/chant_kashi.png" alt="チャントの歌詞" width={28} height={28} />
           <span>チャントの歌詞</span>
         </div>
-        <span className="text-blue-800 bg-white border border-[#0D277E] rounded-full px-2 py-0.5 text-xs font-medium">
+        <span className="text-[#0D277E] bg-white border border-[#0D277E] rounded-full px-2 py-0.5 text-xs font-medium">
           {currentChant.tags.join(", ")}
         </span>
       </div>
@@ -214,7 +214,7 @@ export default function ChantSearchPage() {
       <div className="relative px-2 pt-3 pb-[50px] h-[180px] box-border">
         <div className="text-base text-black leading-tight font-bold h-[140px] overflow-y-auto whitespace-pre-line pr-1">
           <div className="flex items-center justify-between mb-1">
-            <div className="text-blue-800 font-black text-lg md:text-2xl flex-1">
+            <div className="text-[#0D277E] font-black text-lg md:text-2xl flex-1">
               {currentChant.name}
             </div>
             {currentChant.youtubeUrl && (
@@ -334,11 +334,11 @@ export default function ChantSearchPage() {
               }}
 
 
-              className={`rounded-2xl shadow px-4 py-3 text-sm border flex items-center cursor-pointer ${currentId === chant.chantId ? "bg-blue-200 text-white border-blue-700 ring-1 ring-blue-700" : "bg-white text-black border-border"}`}
+              className={`rounded-2xl shadow px-4 py-3 text-sm border flex items-center cursor-pointer ${currentId === chant.chantId ? "bg-blue-200 text-white border-[#0D277E] ring-1 ring-[#0D277E]" : "bg-white text-black border-border"}`}
             >
               <Image src="/chant.png" alt="icon" width={32} height={32} className="mr-3" />
               <div className="flex-1">
-                <div className="font-semibold text-blue-800">{chant.name}</div>
+                <div className="font-semibold text-[#0D277E]">{chant.name}</div>
                 <div className="text-xs text-muted-foreground">
                   {truncateText(chant.lyrics, 15)}
                 </div>
