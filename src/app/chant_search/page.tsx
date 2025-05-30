@@ -160,7 +160,7 @@ export default function ChantSearchPage() {
     if (window.YT?.Player) {
       window.onYouTubeIframeAPIReady();
     }
-  }, [currentChant]);
+  }, [currentChant,shouldPlay]);
 
   useEffect(() => {
     const interval = setInterval(() => {
