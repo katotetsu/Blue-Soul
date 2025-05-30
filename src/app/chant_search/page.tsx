@@ -2,12 +2,52 @@
 
 declare global {
   interface Window {
-    YT: any;
+    YT: {
+      Player: new (
+        elementId: string,
+        config: {
+          height: string | number;
+          width: string | number;
+          videoId: string;
+          playerVars?: Record<string, string | number | boolean>;
+          events?: {
+            onReady?: () => void;
+            onStateChange?: (event: YTPlayerEvent) => void;
+            onError?: () => void;
+          };
+        }
+      ) => YTPlayer;
+      PlayerState: {
+        UNSTARTED: number;
+        ENDED: number;
+        PLAYING: number;
+        PAUSED: number;
+        BUFFERING: number;
+        CUED: number;
+      };
+    };
     onYouTubeIframeAPIReady: () => void;
   }
 }
 
+interface YTPlayer {
+  destroy: () => void;
+  getCurrentTime: () => number;
+  getDuration: () => number;
+  getPlayerState: () => number;
+  pauseVideo: () => void;
+  playVideo: () => void;
+  seekTo: (seconds: number, allowSeekAhead?: boolean) => void;
+  loadVideoById: (videoId: string) => void;
+}
+
+interface YTPlayerEvent {
+  data: number;
+  target: YTPlayer;
+}
+
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
 import { Play, Pause } from "lucide-react";
@@ -23,7 +63,7 @@ export default function ChantSearchPage() {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const playerRef = useRef<any>(null);
+  const playerRef = useRef<YTPlayer | null>(null);
 
   useEffect(() => {
     const loadChants = async () => {
@@ -96,11 +136,11 @@ export default function ChantSearchPage() {
         },
         events: {
           onReady: () => {},
-          onStateChange: (event: any) => {
+          onStateChange: (event: YTPlayerEvent) => {
             const state = event.data;
             if (state === window.YT.PlayerState.ENDED) {
-              playerRef.current.seekTo(0);
-              playerRef.current.playVideo();
+              playerRef.current?.seekTo(0);
+              playerRef.current?.playVideo();
             }
             setIsPlaying(state === window.YT.PlayerState.PLAYING);
           },
@@ -153,7 +193,7 @@ export default function ChantSearchPage() {
     <div className="rounded-2xl shadow overflow-hidden border border-border bg-white">
       <div className="flex items-center justify-between bg-blue-800 text-white px-4 py-2">
         <div className="flex items-center gap-1 text-sm font-semibold">
-          <img src="/chant_kashi.png" alt="チャントの歌詞" className="w-7 h-7" />
+          <Image src="/chant_kashi.png" alt="チャントの歌詞" width={28} height={28} />
           <span>チャントの歌詞</span>
         </div>
         <span className="text-blue-800 bg-white border border-blue-800 rounded-full px-2 py-0.5 text-xs font-medium">
@@ -175,10 +215,12 @@ export default function ChantSearchPage() {
                 rel="noopener noreferrer"
                 className="ml-2"
               >
-                <img
+                <Image
                   src="/youtube.png"
                   alt="YouTube"
-                  className="w-16 h-8 object-contain"
+                  width={64}
+                  height={32}
+                  className="object-contain"
                 />
               </a>
             )}
@@ -213,7 +255,7 @@ export default function ChantSearchPage() {
     {/* 検索バーとフィルター */}
     <section className="w-full max-w-md sticky top-[300px] z-20 bg-[#F1F2F6] pb-2 px-4">
   <div className="text-sm font-semibold flex items-center gap-1 text-blue-800 mb-1">
-    <img src="/Narrow_down.png" alt="絞り込み" className="w-6 h-6" />
+    <Image src="/Narrow_down.png" alt="絞り込み" width={24} height={24} />
     絞り込み
   </div>
 
@@ -283,7 +325,7 @@ export default function ChantSearchPage() {
               }}
               className={`rounded-2xl shadow px-4 py-3 text-sm border flex items-center cursor-pointer ${currentId === chant.chantId ? "bg-blue-200 text-white border-blue-700 ring-1 ring-blue-700" : "bg-white text-black border-border"}`}
             >
-              <img src="/chant.png" alt="icon" className="w-8 h-8 mr-3" />
+              <Image src="/chant.png" alt="icon" width={32} height={32} className="mr-3" />
               <div className="flex-1">
                 <div className="font-semibold text-blue-800">{chant.name}</div>
                 <div className="text-xs text-muted-foreground">
