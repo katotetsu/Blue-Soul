@@ -1,6 +1,6 @@
 //import { FaMusic } from "react-icons/fa";
 import { useRouter } from "next/navigation";
-import { FiInfo } from "react-icons/fi";
+import { BiQrScan } from "react-icons/bi";
 
 export default function Header() {
   const router = useRouter();
@@ -16,14 +16,14 @@ export default function Header() {
         <span className="text-xl font-bold tracking-wide">KATALLER TOYAMA</span>
       </div>
 
-      {/* 右：インフォメーションボタン */}
+      {/* 右：共有ボタン */}
       <button
-        onClick={() => router.push('/information')}
-        className="flex items-center gap-1 px-2 py-1 text-blue-600 border border-blue-600 rounded-md text-sm font-medium hover:bg-blue-50 active:scale-95 transition"
-        aria-label="ガイドページへ"
+        onClick={() => router.push('/share')}
+        className="flex items-center gap-1 px-2 py-1 border border-blue-300 rounded-md text-blue-700 text-sm font-medium hover:bg-blue-50 active:scale-95 transition"
+        aria-label="QRコードで共有"
       >
-        <FiInfo size={16} className="text-blue-600" />
-        <span>ガイド</span>
+        <BiQrScan size={20} />
+        <span>共有</span>
       </button>
 
     </header>
