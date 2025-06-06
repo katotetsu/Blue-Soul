@@ -9,7 +9,6 @@ import Footer from "@/components/common/Footer";
 import CurrentChantDisplay from "@/components/chantCurrent/CurrentChantDisplay";
 import VoteBanner from "@/components/chantCurrent/VoteBanner";
 import ChantCard from "@/components/chantCurrent/ChantCard";
-import CountdownLabel from "@/components/chantCurrent/CountdownLabel";
 import { useVoting } from "@/features/votes/useVoting";
 import { useChantData } from "@/features/chants/useChantData";
 
@@ -48,7 +47,6 @@ export default function ChantCurrentPage() {
             />
           ))}
         </div>
-        <CountdownLabel canVote={canVote} cooldown={cooldown} />
       </div>
 
       {/* Footer */}
