@@ -8,23 +8,14 @@ import { useEffect, useState } from "react";
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
 import { fetchTeamChants } from "@/features/chants/fetchTeamChants";
-import { Chant } from "@/features/chants/types";
+import { Chant, CurrentChant } from "@/features/chants/types";
 import { sendVote } from "@/features/votes/sendVote";
 import { generateFingerprint } from "@/features/votes/generateFingerprint";
-import { collection, query, orderBy, limit, Timestamp, onSnapshot } from "firebase/firestore";
+import { collection, query, orderBy, limit, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import CurrentChantDisplay from "@/components/chantCurrent/CurrentChantDisplay";
 import VoteBanner from "@/components/chantCurrent/VoteBanner";
 import ChantCard from "@/components/chantCurrent/ChantCard";
-
-type CurrentChant = {
-  chantId: string;
-  name: string;
-  lyrics: string;
-  tags: string[];
-  voteCount: number;
-  updatedAt: Timestamp;
-};
 
 export default function ChantCurrentPage() {
   const [cooldown, setCooldown] = useState(0);
