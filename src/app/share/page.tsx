@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FiLink } from 'react-icons/fi';
 import { IoShareOutline } from 'react-icons/io5';
+import { FaXTwitter } from 'react-icons/fa6';
 import Image from 'next/image';
 import Toast from '@/components/appShare/Toast';
 
@@ -17,24 +18,15 @@ export default function SharePage() {
         setShowToast(true);
     };
 
-    const handleShare = async () => {
-        if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: 'カターレ富山 | 応援歌(チャント)検索アプリ',
-                    text: 'カターレ富山の応援歌(チャント)をリアルタイムで表示・投票できるアプリ。みんなで応援しよう',
-                    url: shareUrl,
-                });
-            } catch (err) {
-                console.log('シェアキャンセル or エラー', err);
-            }
-        } else {
-            handleCopy();
-        }
+    const handleTweet = () => {
+        const tweetText = 'みんなで歌おう！📣📱\nカターレ富山のチャントがスマホですぐ見れる\n#カターレ富山 #チャントアプリ';
+        const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl)}`;
+        window.open(twitterUrl, '_blank');
     };
 
+
     return (
-        <main className="pt-15 pb-15 px-4 min-h-screen bg-gray-50 relative">
+        <main className="pt-24 pb-24 px-4 min-h-screen bg-gray-50 relative">
             {/* 戻るボタン */}
             <button
                 onClick={() => router.push('/')}
@@ -54,7 +46,7 @@ export default function SharePage() {
             </button>
 
             {/* メインコンテンツ */}
-            <div className="flex flex-col items-center text-center mt-8">
+            <div className="flex flex-col items-center text-center">
                 <h1 className="text-xl font-bold text-blue-800 mb-2">
                     アプリを共有しよう！
                 </h1>
@@ -63,7 +55,7 @@ export default function SharePage() {
                 </p>
 
                 {/* QRコードカード */}
-                <div className="bg-white p-5 rounded-2xl shadow-lg">
+                <div className="bg-white pt-5 px-5 rounded-2xl shadow-lg">
                     <Image
                         src="/images/app_qr.svg"
                         alt="アプリ共有QRコード"
@@ -71,41 +63,44 @@ export default function SharePage() {
                         height={200}
                         className="rounded"
                     />
-                    <p className="text-blue-700 text-base font-bold tracking-wide">
-                        @BlueSoulApp
+                    <p className="text-transparent bg-clip-text bg-gradient-to-r from-[#0D277E] to-[#1847E4] text-base font-black tracking-wide mb-3 mt-1">
+                        @BlueSoul
                     </p>
                 </div>
 
                 {/* アクションボタン */}
-                <div className="flex gap-3 mt-6">
+                <div className="flex gap-3 mt-4">
                     <button
-                        onClick={handleShare}
-                        className="flex flex-col items-center justify-center w-28 h-20 bg-white rounded-2xl shadow hover:shadow-md transition active:scale-95"
+                        onClick={handleTweet}
+                        className="flex flex-col items-center justify-center w-28 h-18 bg-white rounded-2xl shadow hover:shadow-md transition active:scale-95 shadow-lg"
                     >
-                        <IoShareOutline className="w-6 h-6 mb-2 text-gray-700" />
-                        <span className="text-xs text-gray-700">共有する</span>
+                        <FaXTwitter className="w-6 h-6 mb-2 text-black" />
+                        <span className="text-xs text-gray-700 font-bold">Xで共有する</span>
                     </button>
 
                     <button
                         onClick={handleCopy}
-                        className="flex flex-col items-center justify-center w-28 h-20 bg-white rounded-2xl shadow hover:shadow-md transition active:scale-95"
+                        className="flex flex-col items-center justify-center w-28 h-18 bg-white rounded-2xl shadow hover:shadow-md transition active:scale-95 shadow-lg"
                     >
                         <FiLink className="w-6 h-6 mb-2 text-gray-700" />
-                        <span className="text-xs text-gray-700">リンクをコピー</span>
+                        <span className="text-xs text-gray-700 font-bold">リンクをコピー</span>
                     </button>
+                </div>
+
+                {/* Powerd by blue soul */}
+                <div className="mt-6 text-xs text-gray-500">
+                    <p>Powered by BlueSoul</p>
                 </div>
 
                 {/* トースト */}
                 {showToast && (
-                    <div className="">
-                        <Toast
-                            message="URLをコピーしました！"
-                            show={true}
-                            onClose={() => setShowToast(false)}
-                        />
-                    </div>
+                    <Toast
+                        message="URLをコピーしました！"
+                        show={true}
+                        onClose={() => setShowToast(false)}
+                    />
                 )}
             </div>
-        </main>
+        </main >
     );
 }
