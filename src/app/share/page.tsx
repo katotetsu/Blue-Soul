@@ -3,7 +3,7 @@
 import Image from "next/image";
 
 export default function SharePage() {
-    const shareUrl = "https://your-app-link.com";
+    const shareUrl = "https://blue-soul.vercel.app/";
 
     const handleCopy = () => {
         navigator.clipboard.writeText(shareUrl);
