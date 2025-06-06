@@ -8,7 +8,7 @@ type Props = {
 export default function CurrentChantDisplay({ chant }: Props) {
   return (
     // 🔷 セクション全体（カードの外枠）
-    <section className="fixed top-[70px] w-full max-w-md mx-auto px-4 z-10">
+    <section className="fixed top-[60px] w-full max-w-md mx-auto px-4 z-10">
       <div className="rounded-2xl shadow overflow-hidden">
         
         {/* 🟦 ヘッダー部分（タイトル＋タイムスタンプ） */}
