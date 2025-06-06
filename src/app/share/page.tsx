@@ -19,11 +19,15 @@ export default function SharePage() {
     };
 
     const handleTweet = () => {
-        const tweetText = 'みんなで歌おう！📣📱\nカターレ富山のチャントがスマホですぐ見れる\n#カターレ富山 #チャントアプリ';
+        const tweetText = [
+            'みんなで歌おう！📣📱',
+            'カターレ富山のチャントがスマホですぐ見れる',
+            '#カターレ富山 #チャントアプリ'
+        ].join('\n\n');
+
         const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl)}`;
         window.open(twitterUrl, '_blank');
     };
-
 
     return (
         <main className="pt-24 pb-24 px-4 min-h-screen bg-gray-50 relative">
