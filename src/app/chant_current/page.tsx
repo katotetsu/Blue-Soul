@@ -16,7 +16,6 @@ import { db } from "@/lib/firebase";
 import CurrentChantDisplay from "@/components/chantCurrent/CurrentChantDisplay";
 import VoteBanner from "@/components/chantCurrent/VoteBanner";
 import ChantCard from "@/components/chantCurrent/ChantCard";
-import CountdownLabel from "@/components/chantCurrent/CountdownLabel";
 
 type CurrentChant = {
   chantId: string;
@@ -153,9 +152,7 @@ export default function ChantCurrentPage() {
             />
           ))}
         </div>
-        <CountdownLabel canVote={canVote} cooldown={cooldown} />
       </div>
-
       {/* Footer */}
       <Footer/>
     </div>
