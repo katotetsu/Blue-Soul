@@ -11,7 +11,7 @@ export default function VoteBanner({ canVote, hasVoted, cooldown }: Props) {
         今聞こえているチャントをタップ！
         <span className="text-xs font-normal">
           {!canVote ?
-            `（クールタイム）` :
+            `` :
             hasVoted ?
               `（残り${cooldown}秒）` :
               `（残り${cooldown}秒）`
