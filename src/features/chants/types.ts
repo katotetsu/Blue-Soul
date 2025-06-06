@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase/firestore";
+
 export type Chant = {
     chantId: string;
     name: string;
@@ -7,4 +9,13 @@ export type Chant = {
     year?: number;
     youtubeUrl?: string;
   };
+  
+export type CurrentChant = {
+  chantId: string;
+  name: string;
+  lyrics: string;
+  tags: string[];
+  voteCount: number;
+  updatedAt: Timestamp;
+};
   
