@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FiLink } from 'react-icons/fi';
-import { IoShareOutline } from 'react-icons/io5';
 import { FaXTwitter } from 'react-icons/fa6';
 import Image from 'next/image';
 import Toast from '@/components/appShare/Toast';
