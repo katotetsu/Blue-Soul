@@ -1,14 +1,5 @@
-import { Timestamp } from "firebase/firestore";
 import Image from "next/image";
-
-export type CurrentChant = {
-  chantId: string;
-  name: string;
-  lyrics: string;
-  tags: string[];
-  voteCount: number;
-  updatedAt: Timestamp;
-};
+import { CurrentChant } from "@/features/chants/types";
 
 type Props = {
   chant: CurrentChant | null;
