@@ -6,6 +6,7 @@ import { FiLink } from 'react-icons/fi';
 import { FaXTwitter } from 'react-icons/fa6';
 import Image from 'next/image';
 import Toast from '@/components/appShare/Toast';
+import BackButton from '@/components/appShare/BackButton';
 
 export default function SharePage() {
     const [showToast, setShowToast] = useState(false);
@@ -31,22 +32,7 @@ export default function SharePage() {
     return (
         <main className="pt-24 pb-24 px-4 min-h-screen bg-gray-50 relative">
             {/* 戻るボタン */}
-            <button
-                onClick={() => router.push('/')}
-                className="absolute top-10 left-6 flex items-center gap-1 px-2.5 py-1 text-sm border border-gray-300 bg-white/70 text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-full shadow-sm backdrop-blur-sm transition"
-                aria-label="前のページに戻る"
-            >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-4 h-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                戻る
-            </button>
+            <BackButton href="/" />
 
             {/* メインコンテンツ */}
             <div className="flex flex-col items-center text-center">
@@ -58,16 +44,17 @@ export default function SharePage() {
                 </p>
 
                 {/* QRコードカード */}
-                <div className="bg-white pt-5 px-5 rounded-2xl shadow-lg">
+                <div className="bg-white px-7 pt-7 pb-3 rounded-2xl shadow-md border border-gray-200">
                     <Image
                         src="/images/app_qr.svg"
                         alt="アプリ共有QRコード"
-                        width={200}
-                        height={200}
+                        width={175}
+                        height={175}
                         className="rounded"
                     />
-                    <p className="text-transparent bg-clip-text bg-gradient-to-r from-[#0D277E] to-[#1847E4] text-base font-black tracking-wide mb-3 mt-1">
-                        @BlueSoul
+
+                    <p className="text-sm font-bold text-gray-400 pt-1">
+                        @ kataller-toyama
                     </p>
                 </div>
 
@@ -75,24 +62,27 @@ export default function SharePage() {
                 <div className="flex gap-3 mt-4">
                     <button
                         onClick={handleTweet}
-                        className="flex flex-col items-center justify-center w-28 h-18 bg-white rounded-2xl shadow hover:shadow-md transition active:scale-95 shadow-lg"
+                        className="flex flex-col items-center justify-center w-28 h-18 bg-gray-800 text-white rounded-xl shadow-md hover:bg-gray-900 active:scale-95 transition"
                     >
-                        <FaXTwitter className="w-6 h-6 mb-2 text-black" />
-                        <span className="text-xs text-gray-700 font-bold">Xで共有する</span>
+                        <FaXTwitter className="w-6 h-6 mb-2" />
+                        <span className="text-xs font-bold">Xで共有する</span>
                     </button>
 
                     <button
                         onClick={handleCopy}
-                        className="flex flex-col items-center justify-center w-28 h-18 bg-white rounded-2xl shadow hover:shadow-md transition active:scale-95 shadow-lg"
+                        className="flex flex-col items-center justify-center w-28 h-18 bg-blue-500 text-white rounded-xl shadow-md hover:bg-blue-600 active:scale-95 transition"
                     >
-                        <FiLink className="w-6 h-6 mb-2 text-gray-700" />
-                        <span className="text-xs text-gray-700 font-bold">リンクをコピー</span>
+                        <FiLink className="w-6 h-6 mb-2" />
+                        <span className="text-xs font-bold">リンクをコピー</span>
                     </button>
                 </div>
 
+
+
+
                 {/* Powerd by blue soul */}
                 <div className="mt-6 text-xs text-gray-500">
-                    <p>Powered by BlueSoul</p>
+                    <p>Powered by blue-soul</p>
                 </div>
 
                 {/* トースト */}
