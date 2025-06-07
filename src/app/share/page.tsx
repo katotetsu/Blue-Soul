@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { FiLink } from 'react-icons/fi';
 import { FaXTwitter } from 'react-icons/fa6';
 import Image from 'next/image';
@@ -10,7 +9,6 @@ import BackButton from '@/components/appShare/BackButton';
 
 export default function SharePage() {
     const [showToast, setShowToast] = useState(false);
-    const router = useRouter();
     const shareUrl = 'https://blue-soul.vercel.app/';
 
     const handleCopy = () => {
