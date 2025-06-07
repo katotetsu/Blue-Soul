@@ -14,7 +14,7 @@ export default function ChantSearchFilter({
   setTypeFilter,
 }: ChantSearchFilterProps) {
   return (
-    <section className="fixed top-[300px] w-full max-w-md mx-auto z-30 bg-[#F1F2F6] pb-2 px-4">
+    <section className="fixed top-[290px] w-full max-w-md mx-auto z-30 bg-[#F1F2F6] pb-2 px-4">
       <div className="flex items-center gap-2 w-full">
         <div className="relative flex-1">
           <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
