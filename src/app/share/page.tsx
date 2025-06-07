@@ -16,19 +16,19 @@ export default function SharePage() {
         setShowToast(true);
     };
 
-    const handleTweet = () => {
-        const tweetText = [
-            'みんなで歌おう！📣📱',
-            'カターレ富山のチャントがスマホですぐ見れる',
-            '#カターレ富山 #チャントアプリ',
-            '',
-            'https://blue-soul.vercel.app/'
-        ].join('\n');
+    // tweetText は aタグ用に事前に用意する
+    const tweetText = [
+        'みんなで応援しよう！📣📱',
+        '📱 今のチャント（応援歌）がリアルタイムで見れる',
+        '🔍 歌詞も検索できる',
+        '📦 インストール不要、QRを読み込むだけ！',
+        '',
+        '#カターレ富山 #kataller #応援サポートアプリ',
+        '',
+        'https://blue-soul.vercel.app/'
+    ].join('\n');
 
-        const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
-        window.open(twitterUrl, '_blank', 'noopener,noreferrer');
-    };
-
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
 
     return (
         <main className="pt-24 pb-24 px-4 min-h-screen bg-gray-50 relative">
@@ -61,14 +61,18 @@ export default function SharePage() {
 
                 {/* アクションボタン */}
                 <div className="flex gap-3 mt-4">
-                    <button
-                        onClick={handleTweet}
+                    {/* Xで共有する (aタグ版) */}
+                    <a
+                        href={twitterUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="flex flex-col items-center justify-center w-28 h-18 bg-gray-800 text-white rounded-xl shadow-md hover:bg-gray-900 active:scale-95 transition"
                     >
                         <FaXTwitter className="w-6 h-6 mb-2" />
                         <span className="text-xs font-bold">Xで共有する</span>
-                    </button>
+                    </a>
 
+                    {/* リンクをコピー */}
                     <button
                         onClick={handleCopy}
                         className="flex flex-col items-center justify-center w-28 h-18 bg-blue-500 text-white rounded-xl shadow-md hover:bg-blue-600 active:scale-95 transition"
@@ -78,10 +82,7 @@ export default function SharePage() {
                     </button>
                 </div>
 
-
-
-
-                {/* Powerd by blue soul */}
+                {/* Powered by blue soul */}
                 <div className="mt-6 text-xs text-gray-500">
                     <p>Powered by Blue-Soul</p>
                 </div>
@@ -95,6 +96,6 @@ export default function SharePage() {
                     />
                 )}
             </div>
-        </main >
+        </main>
     );
 }
