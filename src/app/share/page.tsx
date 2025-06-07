@@ -10,7 +10,6 @@ import BackButton from '@/components/appShare/BackButton';
 
 export default function SharePage() {
     const [showToast, setShowToast] = useState(false);
-    const router = useRouter();
     const shareUrl = 'https://blue-soul.vercel.app/';
 
     const handleCopy = () => {
