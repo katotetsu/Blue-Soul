@@ -20,12 +20,15 @@ export default function SharePage() {
         const tweetText = [
             'みんなで歌おう！📣📱',
             'カターレ富山のチャントがスマホですぐ見れる',
-            '#カターレ富山 #チャントアプリ'
-        ].join('\n\n');
+            '#カターレ富山 #チャントアプリ',
+            '',
+            'https://blue-soul.vercel.app/'
+        ].join('\n');
 
-        const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl)}`;
-        window.open(twitterUrl, '_blank');
+        const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
+        window.open(twitterUrl, '_blank', 'noopener,noreferrer');
     };
+
 
     return (
         <main className="pt-24 pb-24 px-4 min-h-screen bg-gray-50 relative">
@@ -80,7 +83,7 @@ export default function SharePage() {
 
                 {/* Powerd by blue soul */}
                 <div className="mt-6 text-xs text-gray-500">
-                    <p>Powered by blue-soul</p>
+                    <p>Powered by Blue-Soul</p>
                 </div>
 
                 {/* トースト */}
