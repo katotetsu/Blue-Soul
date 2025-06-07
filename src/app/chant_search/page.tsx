@@ -182,7 +182,7 @@ export default function ChantSearchPage() {
     <div className="relative w-screen flex flex-col h-screen bg-[#F1F2F6] text-foreground overflow-hidden items-start">
       <Header />
 
-      <section className="fixed top-[70px] w-full max-w-md mx-auto px-4 z-0">
+      <section className="fixed top-[60px] w-full max-w-md mx-auto px-4 z-10">
         {currentChant && (
           <ChantLyricsBox
             chant={currentChant}
@@ -202,10 +202,10 @@ export default function ChantSearchPage() {
         setTypeFilter={setTypeFilter}
       />
 
-      <main className="absolute top-[350px] bottom-[60px] overflow-y-auto w-full max-w-md mx-auto px-4 space-y-4">
+      <main className="absolute top-[340px] bottom-[60px] overflow-y-auto w-full max-w-md mx-auto px-4 space-y-4">
         <section className="space-y-3 pb-4">
           {filtered.length > 0 ? (
-            filtered.map((chant) => (
+            filtered.map((chant,index) => (
               <ChantCard
                 key={chant.chantId}
                 chant={chant}
@@ -225,6 +225,7 @@ export default function ChantSearchPage() {
                     }, 100);
                   }
                 }}
+                 className={index === 0 ? "mt-[2px]" : ""}
               />
             ))
           ) : (
