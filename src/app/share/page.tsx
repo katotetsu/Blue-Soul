@@ -44,38 +44,45 @@ export default function SharePage() {
                 </p>
 
                 {/* QRコードカード */}
-                <div className="bg-white p-5 rounded-2xl shadow-lg">
+                <div className="bg-white px-7 pt-7 pb-3 rounded-2xl shadow-md border border-gray-200">
                     <Image
                         src="/images/app_qr.svg"
                         alt="アプリ共有QRコード"
-                        width={200}
-                        height={200}
+                        width={175}
+                        height={175}
                         className="rounded"
                     />
+
+                    <p className="text-sm font-bold text-gray-400 pt-1">
+                        @ kataller-toyama
+                    </p>
                 </div>
 
                 {/* アクションボタン */}
                 <div className="flex gap-3 mt-4">
                     <button
                         onClick={handleTweet}
-                        className="flex flex-col items-center justify-center w-28 h-18 bg-white rounded-2xl shadow hover:shadow-md transition active:scale-95 shadow-lg"
+                        className="flex flex-col items-center justify-center w-28 h-18 bg-gray-800 text-white rounded-xl shadow-md hover:bg-gray-900 active:scale-95 transition"
                     >
-                        <FaXTwitter className="w-6 h-6 mb-2 text-black" />
-                        <span className="text-xs text-gray-700 font-bold">Xで共有する</span>
+                        <FaXTwitter className="w-6 h-6 mb-2" />
+                        <span className="text-xs font-bold">Xで共有する</span>
                     </button>
 
                     <button
                         onClick={handleCopy}
-                        className="flex flex-col items-center justify-center w-28 h-18 bg-white rounded-2xl shadow hover:shadow-md transition active:scale-95 shadow-lg"
+                        className="flex flex-col items-center justify-center w-28 h-18 bg-blue-500 text-white rounded-xl shadow-md hover:bg-blue-600 active:scale-95 transition"
                     >
-                        <FiLink className="w-6 h-6 mb-2 text-gray-700" />
-                        <span className="text-xs text-gray-700 font-bold">リンクをコピー</span>
+                        <FiLink className="w-6 h-6 mb-2" />
+                        <span className="text-xs font-bold">リンクをコピー</span>
                     </button>
                 </div>
 
+
+
+
                 {/* Powerd by blue soul */}
                 <div className="mt-6 text-xs text-gray-500">
-                    <p>Powered by BlueSoul</p>
+                    <p>Powered by blue-soul</p>
                 </div>
 
                 {/* トースト */}

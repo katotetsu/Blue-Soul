@@ -25,7 +25,7 @@ export default function Toast({
     if (!show && !visible) return null;
 
     return (
-        <div className="mt-4 px-5 py-2 text-base text-green-800 border border-green-300 bg-green-50/80 rounded-xl shadow-sm transition-all backdrop-blur-sm">
+        <div className="mt-4 px-5 py-2 text-base text-blue-800 border border-blue-300 bg-blue-50/80 rounded-xl shadow-sm transition-all backdrop-blur-sm">
             {message}
         </div>
     );
