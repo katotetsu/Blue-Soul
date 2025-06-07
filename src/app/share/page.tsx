@@ -19,11 +19,12 @@ export default function SharePage() {
     // tweetText は aタグ用に事前に用意する
     const tweetText = [
         'みんなで応援しよう！📣📱',
-        '📱 今のチャント（応援歌）がリアルタイムで見れる',
-        '🔍 歌詞も検索できる',
+        '📱 今のチャント（応援歌）がわかる',
+        '🔍 歌詞を検索できる',
         '📦 インストール不要、QRを読み込むだけ！',
         '',
-        '#カターレ富山 #kataller #応援サポートアプリ',
+        '#カターレ富山 #kataller',
+        '#応援サポートアプリ',
         '',
         'https://blue-soul.vercel.app/'
     ].join('\n');
