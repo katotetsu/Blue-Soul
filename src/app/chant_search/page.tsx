@@ -58,7 +58,7 @@ import { db } from "@/lib/firebase";
 export default function ChantSearchPage() {
   const [chants, setChants] = useState<Chant[]>([]);
   const [search, setSearch] = useState("");
-  const [typeFilter, setTypeFilter] = useState<"全て" | "チーム" | "個人">("全て");
+  const [typeFilter, setTypeFilter] = useState<"全て" | "チーム" | "個人">("チーム");
   const [currentId, setCurrentId] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -205,9 +205,9 @@ export default function ChantSearchPage() {
           <Image src="/chant_kashi.png" alt="チャントの歌詞" width={28} height={28} />
           <span>チャントの歌詞</span>
         </div>
-        <span className="text-[#0D277E] bg-white border border-[#0D277E] rounded-full px-2 py-0.5 text-xs font-medium">
+        {/*<span className="text-[#0D277E] bg-white border border-[#0D277E] rounded-full px-2 py-0.5 text-xs font-medium">
           {currentChant.tags.join(", ")}
-        </span>
+        </span>*/}
       </div>
 
       {/* 歌詞エリアと固定バー */}
@@ -274,7 +274,7 @@ export default function ChantSearchPage() {
       </span>
       <input
         type="text"
-        placeholder="キーワード検索 ..."
+        placeholder="チャントや歌詞の検索"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         className="w-full pl-9 pr-3 py-2 text-sm rounded-md border border-[#0D277E] focus:outline-none bg-white"
