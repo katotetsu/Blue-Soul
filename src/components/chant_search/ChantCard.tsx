@@ -7,9 +7,10 @@ interface ChantCardProps {
   chant: Chant;
   isActive: boolean;
   onClick: () => void;
+  className?: string;
 }
 
-export default function ChantCard({ chant, isActive, onClick }: ChantCardProps) {
+export default function ChantCard({ chant, isActive, onClick, className }: ChantCardProps) {
   const truncateText = (text: string, maxLength: number) =>
     text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
 
@@ -20,7 +21,7 @@ export default function ChantCard({ chant, isActive, onClick }: ChantCardProps) 
         isActive
           ? "bg-blue-200 text-white border-[#0D277E] ring-1 ring-[#0D277E]"
           : "bg-white text-black border-border"
-      }`}
+      } ${className ?? ""}`}  // ← ここで反映
     >
       <Image src="/chant.png" alt="icon" width={32} height={32} className="mr-3" />
       <div className="flex-1">

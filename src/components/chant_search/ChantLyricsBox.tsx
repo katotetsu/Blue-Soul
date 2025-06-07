@@ -26,14 +26,14 @@ export default function ChantLyricsBox({
 
   return (
     <div className="rounded-2xl shadow overflow-hidden border border-border bg-white">
-      <div className="flex items-center justify-between bg-[#0D277E] text-white px-4 py-2">
+      <div className="flex items-center justify-between bg-[#0D277E] text-white px-3 py-2">
         <div className="flex items-center gap-1 text-sm font-semibold">
           <Image src="/chant_kashi.png" alt="チャントの歌詞" width={28} height={28} />
           <span>チャントの歌詞</span>
         </div>
       </div>
 
-      <div className="relative px-2 pt-3 pb-[50px] h-[180px] box-border">
+      <div className="relative px-3 pt-2 pb-[50px] h-[180px] box-border">
         <div className="text-base text-black leading-tight font-bold h-[140px] overflow-y-auto whitespace-pre-line pr-1">
           <div className="flex items-center justify-between mb-1">
             <div className="text-[#0D277E] font-black text-lg md:text-2xl flex-1">
